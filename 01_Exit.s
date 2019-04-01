@@ -1,8 +1,8 @@
-.text
+section .text
+    global _start
 
-.global _start
 _start:
-    #exit(2)
-    movq $60, %rax #Syscall #60: exit()
-    movq $2, %rdi  #Exit status: 2
-    syscall        #System call
+    ;exit(2)
+    mov rax, 60 ;Syscall #60: exit()
+    mov rdi, 2  ;Exit status: 2
+    syscall     ;System call
