@@ -5,6 +5,6 @@
 .global _start
 _start:
     #exit(2)
-    mov rax, 1 #Syscall #1: exit()
-    mov rbx, 2 #Exit status: 2
-    int 0x80   #System call
+    mov rax, 60 #Syscall #60: exit()
+    mov rdi, 2  #Exit status: 2
+    syscall     #System call
