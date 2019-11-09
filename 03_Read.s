@@ -14,6 +14,8 @@ section .bss
     InputLength equ 16
     InputBufferSize equ InputLength + 1
     InputBuffer: resb InputBufferSize
+    ReadBytes: resb 1
+    DummyCharacter: resb 1
 
 section .text
     global _start
@@ -34,6 +36,41 @@ _start:
     mov rsi, InputBuffer     ;Input buffer
     mov rdx, InputLength     ;Amount of characters to read
     syscall                  ;System call
+
+    ;Check if the last character is a new line
+    mov [ReadBytes], rax	; ReadBytes = rax (return value of read(); Number of read bytes)
+    mov rsi, InputBuffer	; Point to InputBuffer
+    add rsi, rax		; Point to the last character
+    sub rsi, 1
+    cmp byte [rsi], 10	        ; Check if the last character is 10 (line feed)
+    je .end
+
+    ;Clear the input buffer
+    .ClearInputBuffer:
+    .readCharacter:
+    ;Read the input from stdin
+    ;read(STDIN, DummyCharacter, 1)
+    mov rax, SYS_READ        ;Syscall #0: read()
+    mov rdi, STDIN           ;File descriptor #0 (stdin)
+    mov rsi, DummyCharacter  ;Input buffer
+    mov rdx, 1		     ;Amount of characters to read
+    syscall                  ;System call
+
+    ;Check if rax ist EOF (0)
+    cmp rax, 0
+    je .addNewLine
+
+    ;Check if the read character is 10 (line feed)
+    mov rax, [DummyCharacter]
+    cmp rax, 10		     ;Check if a new line is read in
+    jne .readCharacter       ;If no, jump back to .readCharacter
+
+    ; Add a new line at the end of InputBuffer
+    .addNewLine:
+    mov rsi, InputBuffer
+    add rsi, InputLength
+    mov byte [rsi], 10
+    .end:
 
     ;Write the input to stdout
     ;write(STDOUT, InputBuffer, InputBufferSize)
